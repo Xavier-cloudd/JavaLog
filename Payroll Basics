@@ -1,0 +1,196 @@
+import java.util.Scanner;
+ 
+public class PayrollComputation {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        char again = 'N';
+ 
+        System.out.println("==========================================");
+        System.out.println("        PAYROLL COMPUTATION SYSTEM        ");
+        System.out.println("==========================================");
+ 
+        do {
+            // ===================== INPUT =====================
+            System.out.println();
+            System.out.print("Last Name    : ");
+            String lastName = sc.nextLine();
+            System.out.print("First Name   : ");
+            String firstName = sc.nextLine();
+            System.out.print("Middle Name  : ");
+            String middleName = sc.nextLine();
+            System.out.print("Department   : ");
+            String department = sc.nextLine();
+            System.out.print("Position     : ");
+            String position = sc.nextLine();
+ 
+            double rate;
+            do {
+                System.out.print("Rate per hour: ");
+                rate = sc.nextDouble();
+                if (rate <= 0) {
+                    System.out.println("  Rate must be greater than 0.");
+                }
+            } while (rate <= 0);
+ 
+            // ===================== HOURS (Week 1 to Week 4) =====================
+            double totalHours = 0;
+            double regularHours = 0;
+            double overtimeHours = 0;
+ 
+            for (int week = 1; week <= 4; week++) {
+                double hours;
+                do {
+                    System.out.print("Hours worked, Week " + week + ": ");
+                    hours = sc.nextDouble();
+                    if (hours < 0 || hours > 168) {
+                        System.out.println("  Hours must be from 0 to 168.");
+                    }
+                } while (hours < 0 || hours > 168);
+ 
+                totalHours += hours;
+ 
+                if (hours <= 40) {
+                    regularHours += hours;
+                    continue;               // no overtime this week
+                }
+                regularHours += 40;
+                overtimeHours += hours - 40;
+            }
+ 
+            int dependents;
+            while (true) {
+                System.out.print("Number of dependents: ");
+                dependents = sc.nextInt();
+                if (dependents >= 0) {
+                    break;
+                }
+                System.out.println("  Dependents cannot be negative.");
+            }
+            sc.nextLine();                  // clear the leftover Enter key
+ 
+            // ===================== PROCESS =====================
+            boolean manager = position.toLowerCase().contains("manager");
+ 
+            double overtimePay = overtimeHours * (rate * 1.25);
+            overtimePay = Math.round(overtimePay * 100) / 100.0;
+ 
+            double allowance = 0;
+            if (manager) {
+                allowance = 5000 * 4;
+            }
+ 
+            double regularPay = rate * regularHours;
+            double grossPay = regularPay + overtimePay + allowance;
+ 
+            // SSS
+            double sss;
+            if (grossPay <= 5000) {
+                sss = 105.00;
+            } else if (grossPay <= 10000) {
+                sss = grossPay * 0.05;
+            } else if (grossPay <= 15000) {
+                sss = grossPay * 0.08 + 75;
+            } else {
+                sss = grossPay * 0.12 + 110;
+            }
+            sss = Math.round(sss * 100) / 100.0;
+ 
+            // Pag-IBIG
+            double pagibig;
+            if (grossPay < 5000) {
+                pagibig = 100.00;
+            } else {
+                pagibig = grossPay * 0.03;
+            }
+            pagibig = Math.round(pagibig * 100) / 100.0;
+ 
+            // PhilHealth
+            double philhealth;
+            if (totalHours < 10) {
+                philhealth = 0;
+            } else {
+                philhealth = 120.00;
+            }
+ 
+            // Tax
+            double tax;
+            if (grossPay <= 10000) {
+                tax = grossPay * 0.03;
+            } else if (grossPay <= 25000) {
+                tax = grossPay * 0.08;
+            } else if (grossPay <= 40000) {
+                tax = grossPay * 0.11;
+            } else {
+                tax = grossPay * 0.135;
+            }
+            tax = Math.round(tax * 100) / 100.0;
+ 
+            // Dependents
+            double dependentDeduction = dependents * 1000;
+ 
+            double totalDeduction = sss + pagibig + philhealth + tax + dependentDeduction;
+            double netPay = grossPay - totalDeduction;
+ 
+            // ===================== OUTPUT: PAY SLIP =====================
+            System.out.println();
+            System.out.println("==========================================");
+            System.out.println("                PAY SLIP                  ");
+            System.out.println("==========================================");
+ 
+            System.out.println("EMPLOYEE INFORMATION");
+            System.out.printf("  Name         : %s, %s %s%n", lastName, firstName, middleName);
+            System.out.printf("  Department   : %s%n", department);
+            System.out.printf("  Position     : %s%n", position);
+            System.out.printf("  Rate per hour: P%,.2f%n", rate);
+            System.out.printf("  Dependents   : %d%n", dependents);
+ 
+            System.out.println();
+            System.out.println("HOURS WORKED");
+            System.out.printf("  Total Hours  : %.2f%n", totalHours);
+            System.out.printf("  Regular Hours: %.2f%n", regularHours);
+            System.out.printf("  Overtime Hrs : %.2f%n", overtimeHours);
+ 
+            System.out.println();
+            System.out.println("SALARY COMPUTATION");
+            System.out.printf("  Regular Pay  : P%,.2f%n", regularPay);
+            System.out.printf("  Overtime Pay : P%,.2f%n", overtimePay);
+            System.out.printf("  Allowance    : P%,.2f%n", allowance);
+            System.out.printf("  GROSS PAY    : P%,.2f%n", grossPay);
+ 
+            System.out.println();
+            System.out.println("DEDUCTIONS");
+            System.out.printf("  SSS          : P%,.2f%n", sss);
+            System.out.printf("  Pag-IBIG     : P%,.2f%n", pagibig);
+            System.out.printf("  PhilHealth   : P%,.2f%n", philhealth);
+            System.out.printf("  Tax          : P%,.2f%n", tax);
+            System.out.printf("  Dependents   : P%,.2f%n", dependentDeduction);
+            System.out.printf("  TOTAL DEDUCT.: P%,.2f%n", totalDeduction);
+ 
+            System.out.println();
+            System.out.println("==========================================");
+            System.out.printf("  NET PAY      : P%,.2f%n", netPay);
+            System.out.println("==========================================");
+ 
+            // ===================== RUN AGAIN? =====================
+            String answer;
+            do {
+                System.out.print("\nRun again? (Y/N): ");
+                answer = sc.nextLine().trim().toUpperCase();
+            } while (!answer.equals("Y") && !answer.equals("N"));
+ 
+            again = answer.charAt(0);
+ 
+            switch (again) {
+                case 'Y':
+                    System.out.println("\nStarting a new computation...");
+                    break;
+                case 'N':
+                    System.out.println("\nThank you for using the Payroll Computation System. Goodbye!");
+                    break;
+            }
+        } while (again == 'Y');
+ 
+        sc.close();
+    }
+}
+ 
